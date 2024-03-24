@@ -2,25 +2,22 @@ using UnityEngine;
 
 public class Brick : MonoBehaviour
 {
-    public GameObject brickParticle;
-
-    private GameManager GM;
+    public GameObject brickParticle; // Assign a particle effect prefab in the Inspector.
 
     void Start()
     {
-        // Find the GameManager in the scene and store a reference to it
-        GM = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        // If additional initialization is needed, add it here.
     }
 
     void OnCollisionEnter(Collision other)
     {
-        // Instantiate the brick particle effect at the brick's position and rotation
+        // Instantiate particle effect at the brick's position upon collision.
         Instantiate(brickParticle, transform.position, Quaternion.identity);
 
-        // Call the GameManager's function to handle the brick's destruction
-        GM.DestroyBrick();
+        // Call the GameManager's method to handle a brick being destroyed.
+        GameManager.instance.DestroyBrick();
 
-        // Destroy the brick game object
+        // Then destroy the brick GameObject.
         Destroy(gameObject);
     }
 }

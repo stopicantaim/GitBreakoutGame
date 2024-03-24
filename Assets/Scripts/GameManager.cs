@@ -1,19 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance = null;
+    public static GameManager instance;
 
     public int lives = 3;
     public int score = 0;
-    public int totalBricks; // Add this line to track the total number of bricks
+    // Assuming you're tracking the total number of bricks to determine the win condition
+    public int totalBricks;
 
-    public Text livesText;
-    public Text scoreText;
     public GameObject gameOverPanel;
     public GameObject winPanel;
 
@@ -32,73 +27,34 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-         gameOverPanel.SetActive(false);
+        gameOverPanel.SetActive(false);
         winPanel.SetActive(false);
-        UpdateUI();
     }
 
-      public void LoseLife()
+    public void DestroyBrick()
+    {
+        totalBricks--;
+        score += 100; // Example: Adding 100 points per brick destroyed.
+        if (totalBricks <= 0)
+        {
+            // If all bricks are destroyed, player wins.
+            winPanel.SetActive(true);
+        }
+    }
+
+    public void LoseLife()
     {
         lives--;
-        UpdateUI();
         if (lives <= 0)
         {
-            GameOver();
+            gameOverPanel.SetActive(true);
+            // Consider pausing the game or providing a restart option here.
         }
         else
         {
-            // Optionally reset the player or ball position here
+            // Reset the ball position or other game elements as needed.
         }
     }
 
-     public void DestroyBrick()
-    {
-        totalBricks--;
-        // You could add score incrementing here
-        score += 100; // For example, adding 100 points per brick destroyed
-        UpdateUI();
-
-        // Check if all bricks have been destroyed
-        if (totalBricks <= 0)
-        {
-            // Trigger win condition
-            WinGame();
-        }
-    }
-
-    public void AddScore(int points)
-    {
-        score += points;
-        UpdateUI();
-    }
-
-    void UpdateUI()
-    {
-        livesText.text = "Lives: " + lives;
-        scoreText.text = "Score: " + score;
-    }
-
-    void GameOver()
-    {
-        gameOverPanel.SetActive(true);
-        // Freeze gameplay or offer a restart option
-    }
-
-    public void WinGame()
-    {
-        winPanel.SetActive(true);
-        // Trigger win conditions, could be loading a new level or showing a win screen
-    }
-
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Reload the current scene
-        lives = 3; // Reset lives
-        score = 0; // Reset score
-        gameOverPanel.SetActive(false);
-        winPanel.SetActive(false);
-        UpdateUI();
-    }
-
-
+    // Include additional methods as needed for your game logic.
 }
