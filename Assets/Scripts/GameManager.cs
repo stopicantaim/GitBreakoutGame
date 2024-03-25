@@ -1,60 +1,79 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro; // Add this line to use TextMeshPro
 
-public class GameManager : MonoBehaviour
-{
-    public static GameManager instance;
+public class GameManager : MonoBehaviour {
+    public static GameManager instance = null;
 
     public int lives = 3;
-    public int score = 0;
-    // Assuming you're tracking the total number of bricks to determine the win condition
-    public int totalBricks;
+    public int bricks = 20;
+    public float resetDelay = 1f;
+    public TextMeshProUGUI livesText; // Changed from Text to TextMeshProUGUI
+    public GameObject gameOver;
+    public GameObject youWon;
+    public GameObject bricksPrefab;
+    public GameObject paddle;
+    private GameObject clonePaddle;
 
-    public GameObject gameOverPanel;
-    public GameObject winPanel;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
+    void Awake() {
+        if (instance == null) {
             instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else if (instance != this)
-        {
+        } else if (instance != this) {
             Destroy(gameObject);
         }
+
+        DontDestroyOnLoad(gameObject);
+        Setup();
     }
 
-    void Start()
-    {
-        gameOverPanel.SetActive(false);
-        winPanel.SetActive(false);
+    public void Setup() {
+        clonePaddle = Instantiate(paddle, transform.position, Quaternion.identity);
+        Instantiate(bricksPrefab, transform.position, Quaternion.identity);
     }
 
-    public void DestroyBrick()
-    {
-        totalBricks--;
-        score += 100; // Example: Adding 100 points per brick destroyed.
-        if (totalBricks <= 0)
-        {
-            // If all bricks are destroyed, player wins.
-            winPanel.SetActive(true);
+    void CheckGameOver() {
+        if (bricks < 1) {
+            if (SceneManager.GetActiveScene().buildIndex < SceneManager.sceneCountInBuildSettings - 1) {
+                // Give a bonus life, except on the last level
+                lives++;
+                livesText.text = "Lives: " + lives; // Text assignment for TextMeshPro
+
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            } else {
+                youWon.SetActive(true);
+                Time.timeScale = .25f;
+                Invoke("Reset", resetDelay);
+            }
+        }
+        if (lives < 1) {
+            gameOver.SetActive(true);
+            Time.timeScale = .25f;
+            Invoke("Reset", resetDelay);
         }
     }
 
-    public void LoseLife()
-    {
+    public void LoseLife() {
         lives--;
-        if (lives <= 0)
-        {
-            gameOverPanel.SetActive(true);
-            // Consider pausing the game or providing a restart option here.
-        }
-        else
-        {
-            // Reset the ball position or other game elements as needed.
-        }
+        livesText.text = "Lives: " + lives; // Text assignment for TextMeshPro
+        Destroy(clonePaddle);
+        Invoke("SetupPaddle", resetDelay);
+        CheckGameOver();
     }
 
-    // Include additional methods as needed for your game logic.
+    void SetupPaddle() {
+        clonePaddle = Instantiate(paddle, transform.position, Quaternion.identity);
+    }
+
+    public void DestroyBrick() {
+        bricks--;
+        CheckGameOver();
+    }
+
+    void Update() {
+        if (Input.GetKeyDown(KeyCode.N)) {
+            if (SceneManager.GetActiveScene().buildIndex < SceneManager.sceneCountInBuildSettings - 1) {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            }
+        }
+    }
 }
